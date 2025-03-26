@@ -4,9 +4,20 @@ import subprocess
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize, QPoint, QPropertyAnimation
 from PyQt6.QtGui import QIcon, QFont, QMovie, QPainter, QColor, QPen
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QFileDialog, QMessageBox, QMenuBar, QStatusBar
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QFileDialog,
+    QMessageBox,
+    QMenuBar,
+    QStatusBar,
 )
+
 
 # Custom ToggleSwitch widget with sliding knob and animated icon change.
 class ToggleSwitch(QWidget):
@@ -23,7 +34,9 @@ class ToggleSwitch(QWidget):
         self.knob = QLabel(self)
         self.knob.setFixedSize(self.knob_size, self.knob_size)
         self.knob.setScaledContents(True)
-        self.knob.setPixmap(QIcon("resources/moon.png").pixmap(self.knob_size, self.knob_size))
+        self.knob.setPixmap(
+            QIcon("resources/moon.png").pixmap(self.knob_size, self.knob_size)
+        )
 
         # Position knob at initial (unchecked/dark) state.
         self.knob.move(self.margin, (self.height() - self.knob_size) // 2)
@@ -60,9 +73,13 @@ class ToggleSwitch(QWidget):
         # Change icon during the animation (for a smooth effect, you might update at halfway).
         # Here we simply update immediately.
         if self._checked:
-            self.knob.setPixmap(QIcon("resources/sun.png").pixmap(self.knob_size, self.knob_size))
+            self.knob.setPixmap(
+                QIcon("resources/sun.png").pixmap(self.knob_size, self.knob_size)
+            )
         else:
-            self.knob.setPixmap(QIcon("resources/moon.png").pixmap(self.knob_size, self.knob_size))
+            self.knob.setPixmap(
+                QIcon("resources/moon.png").pixmap(self.knob_size, self.knob_size)
+            )
 
     def mousePressEvent(self, event):
         # Toggle state when the user clicks on the widget.
@@ -85,17 +102,22 @@ class ToggleSwitch(QWidget):
         painter.drawRoundedRect(self.rect(), radius, radius)
         painter.end()
 
+
 # Threads for simulation and download (same as before).
 class SimulationThread(QThread):
     finished_signal = pyqtSignal(bool, int, str)
+
     def __init__(self, url, timeout=120, parent=None):
         super().__init__(parent)
         self.url = url
         self.timeout = timeout
+
     def run(self):
         try:
             simulate_cmd = ["gallery-dl", "--simulate", "--ignore-config", self.url]
-            process = subprocess.run(simulate_cmd, capture_output=True, text=True, timeout=self.timeout)
+            process = subprocess.run(
+                simulate_cmd, capture_output=True, text=True, timeout=self.timeout
+            )
             output = process.stdout
             items = [line for line in output.splitlines() if line.strip()]
             count = len(items)
@@ -103,15 +125,18 @@ class SimulationThread(QThread):
         except Exception as e:
             self.finished_signal.emit(False, 0, str(e))
 
+
 class DownloadThread(QThread):
     progress_signal = pyqtSignal(str)
     finished_signal = pyqtSignal(bool, str)
+
     def __init__(self, url, save_path, force=False, limit=None, parent=None):
         super().__init__(parent)
         self.url = url
         self.save_path = save_path
         self.force = force
         self.limit = limit
+
     def run(self):
         try:
             cmd = ["gallery-dl", "--ignore-config"]
@@ -120,7 +145,9 @@ class DownloadThread(QThread):
             if self.limit:
                 cmd.extend(["--range", f"1-{self.limit}"])
             cmd.extend(["-d", self.save_path, self.url])
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
             for line in iter(process.stdout.readline, ""):
                 line = line.strip()
                 if line:
@@ -133,6 +160,7 @@ class DownloadThread(QThread):
                 self.finished_signal.emit(False, f"Error: {error_output}")
         except Exception as e:
             self.finished_signal.emit(False, f"Error: {e}")
+
 
 class PinterestDownloader(QMainWindow):
     def __init__(self):
@@ -174,7 +202,9 @@ class PinterestDownloader(QMainWindow):
         main_layout.addWidget(self.title_label)
 
         # Subtitle / Instruction
-        self.instruction_label = QLabel("Download Pinterest videos, images, and GIFs online")
+        self.instruction_label = QLabel(
+            "Download Pinterest videos, images, and GIFs online"
+        )
         self.instruction_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.instruction_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
         main_layout.addWidget(self.instruction_label)
@@ -184,7 +214,8 @@ class PinterestDownloader(QMainWindow):
         self.url_input.setPlaceholderText("Paste your Pinterest link here...")
         self.url_input.setFont(QFont("Arial", 12))
         self.url_input.setFixedHeight(40)
-        self.url_input.setStyleSheet("""
+        self.url_input.setStyleSheet(
+            """
             QLineEdit {
                 background-color: #424242;
                 color: #ffffff;
@@ -195,7 +226,8 @@ class PinterestDownloader(QMainWindow):
             QLineEdit:focus {
                 border: 2px solid #90CAF9;
             }
-        """)
+        """
+        )
         main_layout.addWidget(self.url_input)
 
         # Download Buttons Layout
@@ -206,7 +238,8 @@ class PinterestDownloader(QMainWindow):
         self.download_btn.setIconSize(QSize(40, 40))
         self.download_btn.setText("Download")
         self.download_btn.setFont(QFont("Arial", 12, QFont.Weight.Bold))
-        self.download_btn.setStyleSheet("""
+        self.download_btn.setStyleSheet(
+            """
             QPushButton {
                 background-color: #2196F3; 
                 color: #ffffff;
@@ -218,7 +251,8 @@ class PinterestDownloader(QMainWindow):
             QPushButton:hover {
                 background-color: #1976D2;
             }
-        """)
+        """
+        )
         self.download_btn.clicked.connect(self.download_media)
         buttons_layout.addWidget(self.download_btn)
         self.force_download_btn = QPushButton()
@@ -227,7 +261,8 @@ class PinterestDownloader(QMainWindow):
         self.force_download_btn.setIconSize(QSize(40, 40))
         self.force_download_btn.setText("Force Download")
         self.force_download_btn.setFont(QFont("Arial", 12, QFont.Weight.Bold))
-        self.force_download_btn.setStyleSheet("""
+        self.force_download_btn.setStyleSheet(
+            """
             QPushButton {
                 background-color: #F44336; 
                 color: #ffffff;
@@ -239,7 +274,8 @@ class PinterestDownloader(QMainWindow):
             QPushButton:hover {
                 background-color: #D32F2F;
             }
-        """)
+        """
+        )
         self.force_download_btn.clicked.connect(self.force_download_media)
         buttons_layout.addWidget(self.force_download_btn)
         main_layout.addLayout(buttons_layout)
@@ -253,7 +289,8 @@ class PinterestDownloader(QMainWindow):
         self.folder_btn = QPushButton()
         self.folder_btn.setIcon(QIcon("resources/folder.png"))
         self.folder_btn.setFixedSize(40, 40)
-        self.folder_btn.setStyleSheet("""
+        self.folder_btn.setStyleSheet(
+            """
             QPushButton {
                 background-color: #616161;
                 border: none;
@@ -262,7 +299,8 @@ class PinterestDownloader(QMainWindow):
             QPushButton:hover {
                 background-color: #757575;
             }
-        """)
+        """
+        )
         self.folder_btn.clicked.connect(self.choose_folder)
         folder_layout.addWidget(self.folder_btn)
         main_layout.addLayout(folder_layout)
@@ -292,7 +330,8 @@ class PinterestDownloader(QMainWindow):
             self.applyDarkTheme()
 
     def applyLightTheme(self):
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QMainWindow { background-color: #d8dbe0; }
             QLabel { color: #28292c; }
             QMenuBar { background-color: #ffffff; color: #28292c; }
@@ -310,10 +349,12 @@ class PinterestDownloader(QMainWindow):
                 border: 2px solid #90CAF9;
             }
             QPushButton { color: #28292c; }
-        """)
+        """
+        )
 
     def applyDarkTheme(self):
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QMainWindow { background-color: #2E2E2E; }
             QLabel { color: #ffffff; }
             QMenuBar { background-color: #424242; color: #ffffff; }
@@ -331,10 +372,13 @@ class PinterestDownloader(QMainWindow):
                 border: 2px solid #90CAF9;
             }
             QPushButton { color: #ffffff; }
-        """)
+        """
+        )
 
     def choose_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Save Folder", os.path.expanduser("~"))
+        folder = QFileDialog.getExistingDirectory(
+            self, "Select Save Folder", os.path.expanduser("~")
+        )
         if folder:
             self.save_folder = folder
             self.save_folder_label.setText(f"Save to: {self.save_folder}")
@@ -362,7 +406,11 @@ class PinterestDownloader(QMainWindow):
         self.download_btn.setEnabled(False)
         self.force_download_btn.setEnabled(False)
         self.simulation_thread = SimulationThread(url, timeout=120)
-        self.simulation_thread.finished_signal.connect(lambda success, count, output: self.simulation_finished(success, count, output, force))
+        self.simulation_thread.finished_signal.connect(
+            lambda success, count, output: self.simulation_finished(
+                success, count, output, force
+            )
+        )
         self.simulation_thread.start()
 
     def simulation_finished(self, success, count, output, force):
@@ -371,7 +419,9 @@ class PinterestDownloader(QMainWindow):
         self.download_btn.setEnabled(True)
         self.force_download_btn.setEnabled(True)
         if not success:
-            QMessageBox.warning(self, "Simulation Error", f"Simulation failed: {output}")
+            QMessageBox.warning(
+                self, "Simulation Error", f"Simulation failed: {output}"
+            )
             self.status_label.setText("Simulation error.")
             self.status_bar.showMessage("Simulation error.", 5000)
             return
@@ -381,7 +431,7 @@ class PinterestDownloader(QMainWindow):
                 self,
                 "Download Limit",
                 f"This link contains {count} images.\nDo you want to download only the first 100 images?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if reply == QMessageBox.StandardButton.Yes:
                 limit = 100
@@ -392,7 +442,9 @@ class PinterestDownloader(QMainWindow):
         self.movie.start()
         self.status_label.setText("Downloading, please wait...")
         self.status_bar.showMessage("Downloading...")
-        self.download_thread = DownloadThread(url, self.save_folder, force=force, limit=limit)
+        self.download_thread = DownloadThread(
+            url, self.save_folder, force=force, limit=limit
+        )
         self.download_thread.progress_signal.connect(self.on_progress)
         self.download_thread.finished_signal.connect(self.on_finished)
         self.download_thread.start()
@@ -415,14 +467,16 @@ class PinterestDownloader(QMainWindow):
             "About Pinterest Downloader",
             "Pinterest Downloader v1.0\n\n"
             "A professional GUI application built with PyQt6 and gallery-dl to download Pinterest images, videos, and GIFs.\n\n"
-            "If the link contains more than 100 images, you will be given the option to download only the first 100 images only."
+            "If the link contains more than 100 images, you will be given the option to download only the first 100 images only.",
         )
+
 
 def main():
     app = QApplication(sys.argv)
     window = PinterestDownloader()
     window.show()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()
