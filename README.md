@@ -3,7 +3,7 @@
 A professional GUI application built with **PyQt6** and **gallery-dl** that allows you to download Pinterest images, videos, and GIFs with ease.
 
 <p align="center">
-  <img src="resources/logo.png" width="50" height="50" alt="SSTube Icon" />
+  <img src="resources/logo.png" width="150" height="150" alt="SSTube Icon" />
 </p>
 
 
