@@ -8,7 +8,9 @@ A professional GUI application built with **PyQt6** and **gallery-dl** that allo
 
 
 ## Features
-![App Screenshot](resources/screenshot.png)
+<p align="center">
+  <img src="resources/screenshot.png" width="500" height="500" alt="App Screenshot" />
+</p>
 - **Intuitive User Interface:** Built with PyQt6 for a sleek, responsive design.
 - **Theme Toggle:** Easily switch between dark and light modes using a custom toggle switch.
 - **Simulation Mode:** Preview download details before starting the download process.
