@@ -28,7 +28,7 @@ A professional GUI application built with **PyQt6** and **gallery-dl** that allo
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/YourUsername/PinterestDownloader.git
+   git clone https://github.com/UKR-PROJECTS/PinterestDownloader.git
    cd PinterestDownloader
    ```
 
