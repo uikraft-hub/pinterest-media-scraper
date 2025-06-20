@@ -1,4 +1,4 @@
-# Pinterest Downloader v1.0.0
+# Pinterest-Media-Downloader v1.0.0
 [![Status](https://img.shields.io/badge/status-active-47c219.svg)](#) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <p align="center">
   <img src="resources/logo.png" width="150" height="150" alt="SSTube Icon" />
