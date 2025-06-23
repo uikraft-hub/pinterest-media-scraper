@@ -1,4 +1,4 @@
-# 📌 Pinterest-Media-Downloader v1.0.0
+# 📌 Pinterest-Media-Downloader
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green) ![Language: Python](https://img.shields.io/badge/Language-Python-blue) ![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen)
 
@@ -6,7 +6,7 @@ Pinterest Media Downloader is a Streamlit-based desktop/web app to download imag
 
 ---
 
-## ✨ What’s New in v1.0.0
+## ✨ What’s New 
 
 - 🎉 **Initial release** with core download and UI functionality  
 - 🔄 Improved URL normalization & validation  
