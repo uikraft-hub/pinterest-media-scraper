@@ -1,5 +1,4 @@
 import streamlit as st
-import gallery_dl
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -94,247 +93,197 @@ class PinterestDownloader:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
         })
     
     def validate_pinterest_url(self, url):
         """Validate if the URL is a Pinterest URL"""
+        if not url:
+            return False
+            
         pinterest_patterns = [
             r'https?://(?:www\.)?pinterest\.com/.+',
             r'https?://(?:[a-z]{2}\.)?pinterest\.com/.+',  # Support country-specific domains
             r'https?://pin\.it/.+',
         ]
-        return any(re.match(pattern, url) for pattern in pinterest_patterns)
+        return any(re.match(pattern, url.strip()) for pattern in pinterest_patterns)
     
     def normalize_pinterest_url(self, url):
         """Normalize Pinterest URLs to work with different formats"""
         try:
-            # Convert in.pinterest.com or other country-specific domains to www.pinterest.com
+            url = url.strip()
+            
+            # Handle pin.it redirects - follow the redirect to get actual URL
+            if 'pin.it' in url:
+                try:
+                    response = self.session.head(url, allow_redirects=True, timeout=10)
+                    if response.url:
+                        url = response.url
+                except:
+                    pass
+            
+            # Convert country-specific domains to www.pinterest.com
             url = re.sub(r'https?://[a-z]{2}\.pinterest\.com', 'https://www.pinterest.com', url)
             
             # Ensure www prefix for pinterest.com
             url = re.sub(r'https?://pinterest\.com', 'https://www.pinterest.com', url)
             
-            # Extract pin ID from various Pinterest URL formats
-            pin_id = None
+            # Clean up URL parameters that might interfere
+            url = re.sub(r'[?&]utm_[^&]*', '', url)
+            url = re.sub(r'[?&]sent=[^&]*', '', url)
             
-            # Handle pinterest.com/pin/ URLs
-            pin_match = re.search(r'pinterest\.com/pin/(\d+)', url)
-            if pin_match:
-                pin_id = pin_match.group(1)
-                # Return both original and pin.it format for testing
-                return [url, f"https://pin.it/{pin_id}"]
-            
-            # Handle search URLs - extract individual pins if possible
-            if 'search/pins' in url:
-                return [url]  # Return as-is, will be handled by scraping
-            
-            return [url]
+            return url
             
         except Exception as e:
-            return [url]
+            st.warning(f"URL normalization error: {str(e)}")
+            return url
 
-    def get_media_info_gallery_dl(self, url):
-        """Get media information using gallery-dl with proper configuration"""
+    def get_media_info_scraping(self, url):
+        """Enhanced scraping method using requests and BeautifulSoup"""
         try:
-            # Get normalized URLs
-            urls_to_try = self.normalize_pinterest_url(url)
+            normalized_url = self.normalize_pinterest_url(url)
+            media_urls = []
             
-            for test_url in urls_to_try:
+            # Add referer header for Pinterest
+            headers = self.session.headers.copy()
+            headers['Referer'] = 'https://www.pinterest.com/'
+            
+            response = self.session.get(normalized_url, headers=headers, timeout=30)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Method 1: Look for Pinterest's JSON data structures
+            script_tags = soup.find_all('script', id='__PWS_DATA__')
+            if not script_tags:
+                script_tags = soup.find_all('script', string=re.compile(r'pinImg|images|orig'))
+            
+            for script in script_tags:
                 try:
-                    # Create a temporary directory
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        # Configure gallery-dl properly - Fixed configuration method
-                        config_data = {
-                            "extractor": {
-                                "pinterest": {
-                                    "videos": True,
-                                    "boards": True,
-                                    "sections": True
-                                },
-                                "base-directory": temp_dir,
-                                "skip": True,  # Don't actually download, just extract info
-                            }
-                        }
-                        
-                        # Set configuration using the correct method
-                        gallery_dl.config.clear()
-                        # Use set method instead of update
-                        for key, value in config_data.items():
-                            gallery_dl.config.set((), key, value)
-                        
-                        # Try to extract URLs using gallery-dl
-                        from gallery_dl import extractor
-                        
-                        # Get appropriate extractor
-                        extr_class = extractor.find(test_url)
-                        if not extr_class:
-                            continue
-                            
-                        # Create extractor instance
-                        extr = extr_class.from_url(test_url)
-                        
-                        # Extract URLs
-                        urls = []
-                        try:
-                            for msg in extr:
-                                if isinstance(msg, tuple) and len(msg) >= 2:
-                                    msg_type, msg_data = msg[0], msg[1]
-                                    if msg_type == 'url' and isinstance(msg_data, dict):
-                                        media_url = msg_data.get('url')
-                                        if media_url and self._is_valid_media_url(media_url):
-                                            urls.append(media_url)
-                                elif hasattr(msg, 'url') and msg.url:
-                                    if self._is_valid_media_url(msg.url):
-                                        urls.append(msg.url)
-                        except Exception as extract_error:
-                            st.warning(f"Gallery-dl extraction issue for {test_url}: {str(extract_error)}")
-                            continue
-                        
-                        if urls:
-                            return urls
-                            
-                except Exception as url_error:
-                    st.warning(f"Gallery-dl failed for URL {test_url}: {str(url_error)}")
+                    script_content = script.string if script.string else str(script)
+                    
+                    if len(script_content) < 100:
+                        continue
+                    
+                    # Look for high-resolution image URLs
+                    img_patterns = [
+                        r'"url":"(https://i\.pinimg\.com/originals/[^"]+\.(?:jpg|jpeg|png|gif|webp))"',
+                        r'"url":"(https://i\.pinimg\.com/736x/[^"]+\.(?:jpg|jpeg|png|gif|webp))"',
+                        r'"url":"(https://i\.pinimg\.com/564x/[^"]+\.(?:jpg|jpeg|png|gif|webp))"',
+                        r'"images":\{[^}]*"orig":\{[^}]*"url":"([^"]+\.(?:jpg|jpeg|png|gif|webp))"',
+                        r'https://i\.pinimg\.com/[^\s"\'<>]+\.(?:jpg|jpeg|png|gif|webp)',
+                        r'"imageSpec_[^"]*":"([^"]+\.(?:jpg|jpeg|png|gif|webp))"',
+                    ]
+                    
+                    for pattern in img_patterns:
+                        matches = re.findall(pattern, script_content, re.IGNORECASE)
+                        for match in matches:
+                            clean_url = self._clean_url(match)
+                            if clean_url and clean_url not in media_urls and self._is_valid_media_url(clean_url):
+                                # Get highest resolution version
+                                clean_url = self._get_highest_res_url(clean_url)
+                                media_urls.append(clean_url)
+                    
+                    # Look for video URLs
+                    video_patterns = [
+                        r'"url":"(https://[^"]*\.(?:mp4|webm|mov))"',
+                        r'"videoUrl":"([^"]+\.(?:mp4|webm|mov))"',
+                        r'"video":\{[^}]*"url":"([^"]+\.(?:mp4|webm|mov))"',
+                    ]
+                    
+                    for pattern in video_patterns:
+                        matches = re.findall(pattern, script_content, re.IGNORECASE)
+                        for match in matches:
+                            clean_url = self._clean_url(match)
+                            if clean_url and clean_url not in media_urls and self._is_valid_media_url(clean_url):
+                                media_urls.append(clean_url)
+                                
+                except Exception as parse_error:
                     continue
             
-            return None
+            # Method 2: Look for meta tags as fallback
+            if not media_urls:
+                meta_tags = soup.find_all('meta', {'property': re.compile(r'og:image|twitter:image')})
+                for meta in meta_tags:
+                    content = meta.get('content')
+                    if content and self._is_valid_media_url(content):
+                        media_urls.append(self._get_highest_res_url(content))
+            
+            # Method 3: Look for img tags with Pinterest URLs
+            if not media_urls:
+                images = soup.find_all('img')
+                for img in images:
+                    src = img.get('src') or img.get('data-src')
+                    if src and 'pinimg.com' in src and self._is_valid_media_url(src):
+                        media_urls.append(self._get_highest_res_url(src))
+            
+            # Remove duplicates while preserving order
+            unique_urls = []
+            seen = set()
+            for url_item in media_urls:
+                if url_item not in seen:
+                    seen.add(url_item)
+                    unique_urls.append(url_item)
+            
+            return unique_urls if unique_urls else []
+            
+        except requests.exceptions.RequestException as e:
+            st.error(f"Network error: {str(e)}")
+            return []
+        except Exception as e:
+            st.warning(f"Scraping error: {str(e)}")
+            return []
+    
+    def _clean_url(self, url):
+        """Clean and decode URL"""
+        try:
+            # Handle escaped characters
+            url = url.replace('\\u002F', '/').replace('\\', '')
+            url = url.replace('\\u003d', '=').replace('\\u0026', '&')
+            url = url.replace('%2F', '/').replace('%3D', '=').replace('%26', '&')
+            
+            # Remove extra quotes
+            url = url.strip('"\'')
+            
+            return url
+        except:
+            return url
+    
+    def _get_highest_res_url(self, url):
+        """Convert Pinterest image URLs to highest resolution versions"""
+        try:
+            # Replace size indicators with originals for highest quality
+            if 'pinimg.com' in url:
+                # Replace various size patterns with originals
+                size_patterns = [
+                    (r'/236x/', '/originals/'),
+                    (r'/474x/', '/originals/'),
+                    (r'/564x/', '/originals/'),
+                    (r'/736x/', '/originals/'),
+                    (r'/1200x/', '/originals/'),
+                ]
                 
-        except Exception as e:
-            st.warning(f"Gallery-dl method failed: {str(e)}")
-            return None
-    
-    def get_media_info_fallback(self, url):
-        """Enhanced fallback method using requests and BeautifulSoup"""
-        try:
-            # Get normalized URLs
-            urls_to_try = self.normalize_pinterest_url(url)
-            
-            for test_url in urls_to_try:
-                try:
-                    media_urls = []
-                    
-                    # Method 1: Direct page scraping
-                    response = self.session.get(test_url, timeout=30)
-                    response.raise_for_status()
-                    
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    
-                    # Look for Pinterest data in script tags
-                    script_tags = soup.find_all('script')
-                    
-                    for script in script_tags:
-                        try:
-                            script_content = script.string if script.string else str(script)
-                            
-                            # Skip if script is too small
-                            if len(script_content) < 100:
-                                continue
-                            
-                            # Look for image URLs in script content with more patterns
-                            img_patterns = [
-                                r'"url":"(https://i\.pinimg\.com/[^"]+\.(?:jpg|jpeg|png|gif|webp)[^"]*)"',
-                                r'"images":\{[^}]*"orig":\{[^}]*"url":"([^"]+)"',
-                                r'"url":"(https://[^"]*\.(?:jpg|jpeg|png|gif|webp)[^"]*)"',
-                                r'https://i\.pinimg\.com/[^\s"\'<>]+\.(?:jpg|jpeg|png|gif|webp)',
-                                r'"richPinData":[^}]*"url":"([^"]+\.(?:jpg|jpeg|png|gif|webp)[^"]*)"',
-                                r'"imageSpec_[^"]*":"([^"]+\.(?:jpg|jpeg|png|gif|webp)[^"]*)"',
-                            ]
-                            
-                            for pattern in img_patterns:
-                                matches = re.findall(pattern, script_content, re.IGNORECASE)
-                                for match in matches:
-                                    clean_url = match.replace('\\u002F', '/').replace('\\', '')
-                                    clean_url = clean_url.replace('\\u003d', '=').replace('\\u0026', '&')
-                                    
-                                    if clean_url not in media_urls and self._is_valid_media_url(clean_url):
-                                        # Try to get higher resolution version
-                                        clean_url = self._get_higher_res_url(clean_url)
-                                        media_urls.append(clean_url)
-                            
-                            # Look for video URLs
-                            video_patterns = [
-                                r'"url":"(https://[^"]*\.(?:mp4|webm|mov)[^"]*)"',
-                                r'https://[^\s"\'<>]+\.(?:mp4|webm|mov)',
-                                r'"videoUrl":"([^"]+)"',
-                                r'"video":\{[^}]*"url":"([^"]+)"',
-                            ]
-                            
-                            for pattern in video_patterns:
-                                matches = re.findall(pattern, script_content, re.IGNORECASE)
-                                for match in matches:
-                                    clean_url = match.replace('\\u002F', '/').replace('\\', '')
-                                    clean_url = clean_url.replace('\\u003d', '=').replace('\\u0026', '&')
-                                    
-                                    if clean_url not in media_urls and self._is_valid_media_url(clean_url):
-                                        media_urls.append(clean_url)
-                                        
-                        except Exception as parse_error:
-                            continue
-                    
-                    # Method 2: Look for meta tags
-                    if not media_urls:
-                        meta_tags = soup.find_all('meta', {'property': re.compile(r'og:image|twitter:image')})
-                        for meta in meta_tags:
-                            content = meta.get('content')
-                            if content and self._is_valid_media_url(content):
-                                media_urls.append(self._get_higher_res_url(content))
-                    
-                    # Method 3: Direct image and video tags
-                    if not media_urls:
-                        images = soup.find_all('img', {'src': True})
-                        videos = soup.find_all('video', {'src': True})
-                        
-                        for img in images:
-                            src = img.get('src')
-                            if src and self._is_valid_media_url(src):
-                                media_urls.append(self._get_higher_res_url(src))
-                        
-                        for video in videos:
-                            src = video.get('src')
-                            if src and self._is_valid_media_url(src):
-                                media_urls.append(src)
-                    
-                    # Remove duplicates
-                    unique_urls = []
-                    for url_item in media_urls:
-                        if url_item not in unique_urls:
-                            unique_urls.append(url_item)
-                    
-                    if unique_urls:
-                        return unique_urls
-                        
-                except Exception as url_error:
-                    continue
-            
-            return []
-            
-        except Exception as e:
-            st.warning(f"Fallback method error: {str(e)}")
-            return []
-    
-    def _get_higher_res_url(self, url):
-        """Convert Pinterest image URLs to higher resolution versions"""
-        try:
-            # Replace common size indicators with originals
-            size_patterns = [
-                (r'/236x/', '/originals/'),
-                (r'/474x/', '/originals/'),
-                (r'/564x/', '/originals/'),
-                (r'/736x/', '/originals/'),
-                (r'_\d+x\d+\.', '_original.'),
-            ]
-            
-            for pattern, replacement in size_patterns:
-                url = re.sub(pattern, replacement, url)
+                for pattern, replacement in size_patterns:
+                    url = re.sub(pattern, replacement, url)
+                
+                # If no size pattern found, try to construct originals URL
+                if '/originals/' not in url and 'pinimg.com' in url:
+                    # Extract the hash part after the domain
+                    match = re.search(r'pinimg\.com/[^/]+/(.+)', url)
+                    if match:
+                        hash_part = match.group(1)
+                        base_url = url.split('pinimg.com')[0] + 'pinimg.com'
+                        url = f"{base_url}/originals/{hash_part}"
             
             return url
         except:
@@ -350,20 +299,25 @@ class PinterestDownloader:
             if not parsed.scheme or not parsed.netloc:
                 return False
             
-            # Check for image/video extensions or known Pinterest domains
+            # Check for valid extensions or Pinterest domains
             valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.webm', '.mov']
             valid_domains = ['pinimg.com', 'pinterest.com']
             
             url_lower = url.lower()
             
-            return (any(ext in url_lower for ext in valid_extensions) or 
-                    any(domain in parsed.netloc for domain in valid_domains)) and \
-                   'placeholder' not in url_lower and 'default' not in url_lower
+            # Must have valid extension AND be from Pinterest domain
+            has_valid_ext = any(ext in url_lower for ext in valid_extensions)
+            has_valid_domain = any(domain in parsed.netloc for domain in valid_domains)
+            
+            # Exclude placeholder and default images
+            is_not_placeholder = not any(word in url_lower for word in ['placeholder', 'default', 'avatar', 'profile'])
+            
+            return has_valid_ext and has_valid_domain and is_not_placeholder
         except:
             return False
     
     def download_media(self, urls, output_dir, max_files=None, progress_callback=None):
-        """Download media files"""
+        """Download media files with improved error handling"""
         downloaded_files = []
         
         if max_files:
@@ -376,10 +330,19 @@ class PinterestDownloader:
                 if progress_callback:
                     progress_callback(i + 1, total_files, f"Downloading {i + 1}/{total_files}")
                 
-                response = self.session.get(url, stream=True, timeout=30)
+                # Add referer header
+                headers = self.session.headers.copy()
+                headers['Referer'] = 'https://www.pinterest.com/'
+                
+                response = self.session.get(url, stream=True, timeout=30, headers=headers)
                 response.raise_for_status()
                 
-                # Determine file extension from URL or content type
+                # Validate content length
+                content_length = response.headers.get('content-length')
+                if content_length and int(content_length) < 1000:  # Skip very small files
+                    continue
+                
+                # Determine file extension
                 content_type = response.headers.get('content-type', '').lower()
                 
                 if '.jpg' in url.lower() or 'jpeg' in content_type:
@@ -395,23 +358,28 @@ class PinterestDownloader:
                 elif '.webm' in url.lower() or 'webm' in content_type:
                     ext = '.webm'
                 elif 'image' in content_type:
-                    ext = '.jpg'  # Default for images
+                    ext = '.jpg'
                 elif 'video' in content_type:
-                    ext = '.mp4'  # Default for videos
+                    ext = '.mp4'
                 else:
-                    ext = '.jpg'  # Ultimate fallback
+                    ext = '.jpg'
                 
                 filename = f"pinterest_media_{i + 1:03d}{ext}"
                 filepath = os.path.join(output_dir, filename)
                 
+                # Download with progress
                 with open(filepath, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
                 
                 # Verify file was created and has content
-                if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                if os.path.exists(filepath) and os.path.getsize(filepath) > 1000:  # At least 1KB
                     downloaded_files.append(filepath)
+                else:
+                    # Remove invalid files
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
                 
             except Exception as e:
                 if progress_callback:
@@ -422,9 +390,15 @@ class PinterestDownloader:
     
     def create_zip(self, files, zip_path):
         """Create a zip file from downloaded files"""
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for file_path in files:
-                zipf.write(file_path, os.path.basename(file_path))
+        try:
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for file_path in files:
+                    if os.path.exists(file_path):
+                        zipf.write(file_path, os.path.basename(file_path))
+            return True
+        except Exception as e:
+            st.error(f"Error creating ZIP file: {str(e)}")
+            return False
 
 def main():
     # Header
@@ -445,22 +419,35 @@ def main():
         # Quality settings
         quality = st.selectbox(
             "Download Quality",
-            ["High", "Medium", "Low"],
+            ["High (Original)", "Medium (736px)", "Low (564px)"],
             index=0
         )
         
         # Output format
         output_format = st.selectbox(
             "Output Format",
-            ["Original", "ZIP Archive"],
-            index=1
+            ["ZIP Archive", "Individual Files"],
+            index=0
         )
         
         # Advanced settings
         with st.expander("Advanced Settings"):
-            timeout = st.slider("Request Timeout (seconds)", 5, 60, 30)
+            timeout = st.slider("Request Timeout (seconds)", 10, 60, 30)
             max_retries = st.slider("Max Retries", 1, 5, 3)
-            concurrent_downloads = st.slider("Concurrent Downloads", 1, 10, 3)
+            
+        # Instructions
+        with st.expander("📋 Instructions"):
+            st.write("""
+            **Supported URLs:**
+            - Individual pins: `pinterest.com/pin/123456789/`
+            - Pin.it short URLs: `pin.it/abc123`
+            - Country-specific domains: `in.pinterest.com/pin/...`
+            
+            **Tips:**
+            - Make sure the pin is publicly accessible
+            - Some pins may be restricted or deleted
+            - Use direct pin URLs for best results
+            """)
     
     # Main interface
     col1, col2 = st.columns([2, 1])
@@ -471,8 +458,8 @@ def main():
         # URL input
         url = st.text_input(
             "Pinterest URL",
-            placeholder="https://pinterest.com/pin/... or https://pin.it/... or https://in.pinterest.com/pin/...",
-            help="Enter a Pinterest pin URL, board URL, or profile URL"
+            placeholder="https://pinterest.com/pin/... or https://pin.it/...",
+            help="Enter a Pinterest pin URL"
         )
         
         # Validate URL
@@ -482,70 +469,60 @@ def main():
                 ❌ Invalid Pinterest URL. Please enter a valid Pinterest link.
             </div>
             """, unsafe_allow_html=True)
-            return
         
         # Analyze button
-        if st.button("🔍 Analyze URL", type="primary", use_container_width=True):
-            if url:
-                with st.spinner("Analyzing Pinterest URL..."):
-                    progress_container = st.container()
-                    with progress_container:
-                        st.info("🔄 Step 1: Trying gallery-dl method...")
+        elif url and st.button("🔍 Analyze URL", type="primary", use_container_width=True):
+            with st.spinner("Analyzing Pinterest URL..."):
+                progress_container = st.container()
+                
+                with progress_container:
+                    st.info("🔄 Extracting media URLs from Pinterest page...")
+                
+                # Get media URLs using scraping method
+                media_urls = downloader.get_media_info_scraping(url)
+                
+                progress_container.empty()
+                
+                if media_urls:
+                    st.session_state.media_urls = media_urls
+                    st.session_state.analyzed_url = url
                     
-                    # Try gallery-dl first
-                    media_urls = downloader.get_media_info_gallery_dl(url)
+                    # Show success with media breakdown
+                    image_count = sum(1 for url in media_urls if any(ext in url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']))
+                    video_count = len(media_urls) - image_count
                     
-                    # Fallback to custom method
-                    if not media_urls:
-                        with progress_container:
-                            st.info("🔄 Step 2: Trying enhanced scraping method...")
-                        media_urls = downloader.get_media_info_fallback(url)
+                    st.markdown(f"""
+                    <div class="status-success">
+                        ✅ Found {len(media_urls)} media files<br>
+                        📸 Images: {image_count} | 🎥 Videos: {video_count}
+                    </div>
+                    """, unsafe_allow_html=True)
                     
-                    progress_container.empty()  # Clear progress messages
+                    # Show URLs for debugging
+                    with st.expander("🔍 Debug: Found URLs"):
+                        for i, media_url in enumerate(media_urls):
+                            st.text(f"{i+1}. {media_url}")
+                else:
+                    st.markdown("""
+                    <div class="status-error">
+                        ❌ No media files found. This could be due to:<br>
+                        • Private or restricted Pinterest content<br>
+                        • Invalid or expired URL<br>
+                        • Pinterest's content protection measures<br>
+                        • Network connectivity issues
+                    </div>
+                    """, unsafe_allow_html=True)
                     
-                    if media_urls:
-                        st.session_state.media_urls = media_urls
-                        st.session_state.analyzed_url = url
-                        
-                        # Show success with media type breakdown
-                        image_count = sum(1 for url in media_urls if any(ext in url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']))
-                        video_count = len(media_urls) - image_count
-                        
-                        st.markdown(f"""
-                        <div class="status-success">
-                            ✅ Found {len(media_urls)} media files<br>
-                            📸 Images: {image_count} | 🎥 Videos: {video_count}
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        # Show first few URLs for debugging
-                        with st.expander("🔍 Debug: Found URLs (first 5)"):
-                            for i, media_url in enumerate(media_urls[:5]):
-                                st.text(f"{i+1}. {media_url}")
-                    else:
-                        st.markdown("""
-                        <div class="status-error">
-                            ❌ No media files found. This could be due to:<br>
-                            • Private/restricted Pinterest content<br>
-                            • Invalid or expired URL<br>
-                            • Pinterest's anti-scraping measures<br>
-                            • Network connectivity issues
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        # Provide troubleshooting tips
-                        with st.expander("💡 Troubleshooting Tips"):
-                            st.write("""
-                            **Try these solutions:**
-                            1. Make sure the Pinterest URL is publicly accessible
-                            2. Try using a pin.it short URL instead
-                            3. Check if the pin still exists on Pinterest
-                            4. Try a different Pinterest URL
-                            5. Wait a few minutes and try again
-                            6. For search URLs, try individual pin URLs instead
-                            """)
-            else:
-                st.warning("Please enter a Pinterest URL")
+                    # Troubleshooting tips
+                    with st.expander("💡 Troubleshooting Tips"):
+                        st.write("""
+                        **Try these solutions:**
+                        1. Verify the Pinterest URL is publicly accessible
+                        2. Try using a pin.it short URL
+                        3. Check if the pin still exists on Pinterest
+                        4. Wait a few minutes and try again
+                        5. Make sure you're using a direct pin URL, not a board or profile URL
+                        """)
     
     with col2:
         st.subheader("📊 Media Info")
@@ -555,19 +532,22 @@ def main():
             
             st.metric("Total Media Files", media_count)
             
-            # Preview some media
+            # Preview media
             if media_count > 0:
                 st.write("**Preview:**")
-                preview_urls = st.session_state.media_urls[:3]  # Show first 3
                 
-                for i, media_url in enumerate(preview_urls):
+                # Show first few media items
+                for i, media_url in enumerate(st.session_state.media_urls[:3]):
                     try:
-                        if any(ext in media_url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif']):
+                        if any(ext in media_url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
                             st.image(media_url, width=150, caption=f"Image {i+1}")
                         else:
-                            st.write(f"Media {i+1}: {os.path.basename(media_url)}")
-                    except:
-                        st.write(f"Media {i+1}: {media_url[:50]}...")
+                            st.write(f"📹 Video {i+1}")
+                    except Exception as e:
+                        st.write(f"Media {i+1}: Preview unavailable")
+                
+                if media_count > 3:
+                    st.write(f"... and {media_count - 3} more files")
     
     # Download section
     if hasattr(st.session_state, 'media_urls') and st.session_state.media_urls:
@@ -578,11 +558,10 @@ def main():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            # Initialize download_count safely - Fixed the value error
+            # Safe initialization of download count
             if 'download_count' not in st.session_state:
                 st.session_state.download_count = min(media_count, 10)
             
-            # Ensure the value doesn't exceed the media count
             current_value = min(st.session_state.download_count, media_count)
             
             download_count = st.number_input(
@@ -590,11 +569,9 @@ def main():
                 min_value=1,
                 max_value=media_count,
                 value=current_value,
-                key="download_count_input",
                 help=f"Choose how many files to download (max: {media_count})"
             )
             
-            # Update session state when number input changes
             st.session_state.download_count = download_count
         
         with col2:
@@ -617,7 +594,6 @@ def main():
         
         # Download button
         if st.button("🚀 Start Download", type="primary", use_container_width=True):
-            # Create temporary directory
             temp_dir = tempfile.mkdtemp()
             
             try:
@@ -653,33 +629,35 @@ def main():
                     # Create ZIP if requested
                     if output_format == "ZIP Archive":
                         zip_path = os.path.join(temp_dir, "pinterest_media.zip")
-                        downloader.create_zip(downloaded_files, zip_path)
-                        
-                        # Provide download link
-                        with open(zip_path, "rb") as f:
-                            st.download_button(
-                                label="📦 Download ZIP Archive",
-                                data=f.read(),
-                                file_name="pinterest_media.zip",
-                                mime="application/zip",
-                                use_container_width=True
-                            )
+                        if downloader.create_zip(downloaded_files, zip_path):
+                            # Provide download link
+                            with open(zip_path, "rb") as f:
+                                st.download_button(
+                                    label="📦 Download ZIP Archive",
+                                    data=f.read(),
+                                    file_name="pinterest_media.zip",
+                                    mime="application/zip",
+                                    use_container_width=True
+                                )
+                        else:
+                            st.error("Failed to create ZIP archive")
                     else:
                         # Individual file downloads
                         st.write("**Download Individual Files:**")
                         for file_path in downloaded_files:
-                            with open(file_path, "rb") as f:
-                                filename = os.path.basename(file_path)
-                                st.download_button(
-                                    label=f"📄 {filename}",
-                                    data=f.read(),
-                                    file_name=filename,
-                                    use_container_width=True
-                                )
+                            if os.path.exists(file_path):
+                                with open(file_path, "rb") as f:
+                                    filename = os.path.basename(file_path)
+                                    st.download_button(
+                                        label=f"📄 {filename}",
+                                        data=f.read(),
+                                        file_name=filename,
+                                        use_container_width=True
+                                    )
                 else:
                     st.markdown("""
                     <div class="status-error">
-                        ❌ No files were downloaded successfully. Please check the URLs and try again.
+                        ❌ No files were downloaded successfully. The media URLs may be invalid or protected.
                     </div>
                     """, unsafe_allow_html=True)
                     
@@ -687,7 +665,7 @@ def main():
                 st.error(f"Download failed: {str(e)}")
             
             finally:
-                # Cleanup
+                # Cleanup temporary directory
                 try:
                     shutil.rmtree(temp_dir)
                 except:
@@ -697,9 +675,10 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #666; padding: 1rem;">
-        <p>💡 <strong>Tips:</strong> This tool works with Pinterest pins, boards, and profiles. 
-        For best results, use direct Pinterest URLs.</p>
+        <p>💡 <strong>Tips:</strong> This tool works best with individual Pinterest pins. 
+        For best results, use direct Pinterest pin URLs.</p>
         <p>⚠️ <strong>Note:</strong> Please respect Pinterest's terms of service and copyright laws.</p>
+        <p>🔧 <strong>Technical:</strong> This tool uses web scraping to extract media URLs from Pinterest pages.</p>
     </div>
     """, unsafe_allow_html=True)
 

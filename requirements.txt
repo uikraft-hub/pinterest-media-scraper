@@ -1,5 +1,4 @@
 streamlit>=1.28.0
-gallery-dl>=1.26.0
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 Pillow>=10.0.0
