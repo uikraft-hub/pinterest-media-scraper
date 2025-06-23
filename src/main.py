@@ -1,3 +1,40 @@
+"""
+Pinterest Media Downloader - Professional Pinterest Media Files Downloader
+==============================================
+
+Pinterest Media Downloader with Graphical User Interface
+Streamlit-based desktop/web app to download images and videos from Pinterest.
+
+Author: Ujjwal Nova
+License: MIT
+Repository: https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader
+
+What's New:
+- Improved URL normalization and validation
+- Enhanced fallback scraping for more robust media extraction
+- Better error handling and user feedback
+- Cleaner UI: Includes quick-select buttons (e.g., "First 5", "First 10", "All Files") and improved download options for easier selection and downloading of media files
+
+Features:
+- Download images and videos from Pinterest pins, boards, and profiles
+- Supports both gallery-dl and custom scraping fallback
+- Download as original files or ZIP archive
+- Quality and advanced settings (timeout, retries, concurrency)
+- Professional UI with media preview and progress tracking
+
+Dependencies:
+- streamlit>=1.28.0
+- gallery-dl>=1.26.0
+- requests>=2.31.0
+- beautifulsoup4>=4.12.0
+- Pillow>=10.0.0
+- lxml>=4.9.0
+
+Usage:
+- cd src
+- streamlit run main.py
+"""
+
 import streamlit as st
 import gallery_dl
 import requests
