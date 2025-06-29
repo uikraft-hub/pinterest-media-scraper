@@ -76,8 +76,8 @@ pip install -r requirements.txt
 1. **Clone** the repo
 
    ```bash
-   git clone https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader.git
-   cd Pinterest-Media-Downloader/src
+   git clone https://github.com/ukr-projects/pinterest-media-scraper.git
+   cd pinterest-media-scraper/src
    ```
 2. **Install** dependencies
 
