@@ -19,7 +19,7 @@ Pinterest Media Downloader is a Streamlit-based desktop/web app to download imag
 ## 🛠️ All Features
 
 - 📥 Download images & videos from Pinterest pins, boards, profiles  
-- 🔄 Dual extraction methods: **gallery-dl** + custom BeautifulSoup fallback  
+- 🔄 Custom BeautifulSoup scraping for media extraction
 - 📦 Save media as original files or bundled ZIP archive  
 - ⚡ Quality & advanced settings: timeout, retries, concurrency  
 - 👁️‍🗨️ Media preview cards with progress tracking  
@@ -51,7 +51,6 @@ Pinterest-Media-Downloader/
 - **Python 3.8+**  
 - **pip** package manager  
 - **Streamlit**  
-- **gallery-dl**  
 - **requests**  
 - **beautifulsoup4**  
 - **Pillow**  
@@ -66,7 +65,7 @@ pip install -r requirements.txt
 > Or manually:
 >
 > ```bash
-> pip install streamlit gallery-dl requests beautifulsoup4 pillow lxml
+> pip install streamlit requests beautifulsoup4 pillow lxml
 > ```
 
 ---
@@ -124,7 +123,6 @@ pip install -r requirements.txt
 ## 🙏 Acknowledgments
 
 * **Streamlit** for rapid UI development
-* **gallery-dl** for Pinterest extraction
 * **BeautifulSoup** for HTML parsing
 * **Requests** for HTTP sessions
 * **Pillow** for media handling

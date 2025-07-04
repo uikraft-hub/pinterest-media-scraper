@@ -17,14 +17,13 @@ What's New:
 
 Features:
 - Download images and videos from Pinterest pins, boards, and profiles
-- Supports both gallery-dl and custom scraping fallback
+- Uses a custom scraping method to find media
 - Download as original files or ZIP archive
 - Quality and advanced settings (timeout, retries, concurrency)
 - Professional UI with media preview and progress tracking
 
 Dependencies:
 - streamlit>=1.28.0
-- gallery-dl>=1.26.0
 - requests>=2.31.0
 - beautifulsoup4>=4.12.0
 - Pillow>=10.0.0
@@ -36,7 +35,6 @@ Usage:
 """
 
 import streamlit as st
-import gallery_dl
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -154,6 +152,15 @@ class PinterestDownloader:
     def normalize_pinterest_url(self, url):
         """Normalize Pinterest URLs to work with different formats"""
         try:
+            # If it's a short URL, resolve it first
+            if 'pin.it' in url:
+                try:
+                    response = self.session.head(url, allow_redirects=True, timeout=10)
+                    url = response.url
+                except requests.exceptions.RequestException:
+                    # If resolving fails, proceed with the original URL
+                    pass
+
             # Convert in.pinterest.com or other country-specific domains to www.pinterest.com
             url = re.sub(r'https?://[a-z]{2}\.pinterest\.com', 'https://www.pinterest.com', url)
             
@@ -179,78 +186,8 @@ class PinterestDownloader:
         except Exception as e:
             return [url]
 
-    def get_media_info_gallery_dl(self, url):
-        """Get media information using gallery-dl with proper configuration"""
-        try:
-            # Get normalized URLs
-            urls_to_try = self.normalize_pinterest_url(url)
-            
-            for test_url in urls_to_try:
-                try:
-                    # Create a temporary directory
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        # Configure gallery-dl properly - Fixed configuration method
-                        config_data = {
-                            "extractor": {
-                                "pinterest": {
-                                    "videos": True,
-                                    "boards": True,
-                                    "sections": True
-                                },
-                                "base-directory": temp_dir,
-                                "skip": True,  # Don't actually download, just extract info
-                            }
-                        }
-                        
-                        # Set configuration using the correct method
-                        gallery_dl.config.clear()
-                        # Use set method instead of update
-                        for key, value in config_data.items():
-                            gallery_dl.config.set((), key, value)
-                        
-                        # Try to extract URLs using gallery-dl
-                        from gallery_dl import extractor
-                        
-                        # Get appropriate extractor
-                        extr_class = extractor.find(test_url)
-                        if not extr_class:
-                            continue
-                            
-                        # Create extractor instance
-                        extr = extr_class.from_url(test_url)
-                        
-                        # Extract URLs
-                        urls = []
-                        try:
-                            for msg in extr:
-                                if isinstance(msg, tuple) and len(msg) >= 2:
-                                    msg_type, msg_data = msg[0], msg[1]
-                                    if msg_type == 'url' and isinstance(msg_data, dict):
-                                        media_url = msg_data.get('url')
-                                        if media_url and self._is_valid_media_url(media_url):
-                                            urls.append(media_url)
-                                elif hasattr(msg, 'url') and msg.url:
-                                    if self._is_valid_media_url(msg.url):
-                                        urls.append(msg.url)
-                        except Exception as extract_error:
-                            st.warning(f"Gallery-dl extraction issue for {test_url}: {str(extract_error)}")
-                            continue
-                        
-                        if urls:
-                            return urls
-                            
-                except Exception as url_error:
-                    st.warning(f"Gallery-dl failed for URL {test_url}: {str(url_error)}")
-                    continue
-            
-            return None
-                
-        except Exception as e:
-            st.warning(f"Gallery-dl method failed: {str(e)}")
-            return None
-    
-    def get_media_info_fallback(self, url):
-        """Enhanced fallback method using requests and BeautifulSoup"""
+    def get_media_info(self, url):
+        """Get media information using requests and BeautifulSoup"""
         try:
             # Get normalized URLs
             urls_to_try = self.normalize_pinterest_url(url)
@@ -525,20 +462,7 @@ def main():
         if st.button("🔍 Analyze URL", type="primary", use_container_width=True):
             if url:
                 with st.spinner("Analyzing Pinterest URL..."):
-                    progress_container = st.container()
-                    with progress_container:
-                        st.info("🔄 Step 1: Trying gallery-dl method...")
-                    
-                    # Try gallery-dl first
-                    media_urls = downloader.get_media_info_gallery_dl(url)
-                    
-                    # Fallback to custom method
-                    if not media_urls:
-                        with progress_container:
-                            st.info("🔄 Step 2: Trying enhanced scraping method...")
-                        media_urls = downloader.get_media_info_fallback(url)
-                    
-                    progress_container.empty()  # Clear progress messages
+                    media_urls = downloader.get_media_info(url)
                     
                     if media_urls:
                         st.session_state.media_urls = media_urls
