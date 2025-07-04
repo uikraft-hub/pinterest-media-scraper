@@ -1,8 +1,8 @@
-# 📌 Pinterest-Media-Downloader
+# 📌 pinterest-media-scraper
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green) ![Language: Python](https://img.shields.io/badge/Language-Python-blue) ![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen)
 
-Pinterest Media Downloader is a Streamlit-based desktop/web app to download images and videos from Pinterest pins, boards, and profiles—quickly and reliably.
+pinterest-media-scraper is a Streamlit-based desktop/web app to download images and videos from Pinterest pins, boards, and profiles—quickly and reliably.
 
 ---
 
