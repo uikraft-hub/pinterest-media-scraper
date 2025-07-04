@@ -135,8 +135,8 @@ If you find this project useful, please consider giving it a star on GitHub! You
 
 ## 📞 Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader/issues)
-- **Discussions**: [Community discussions and Q&A](https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader/discussions)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/ukr-projects/pinterest-media-scraper/issues)
+- **Discussions**: [Community discussions and Q&A](https://github.com/ukr-projects/pinterest-media-scraper/discussions)
 - **Email**: ukrpurojekuto@gmail.com
 
 ---
@@ -145,6 +145,6 @@ If you find this project useful, please consider giving it a star on GitHub! You
 
 **Made with ❤️ by the Ujjwal Nova**
 
-[⭐ Star this repo](https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader) | [🐛 Report Bug](https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader/issues) | [💡 Request Feature](https://github.com/UKR-PROJECTS/Pinterest-Media-Downloader/issues)
+[⭐ Star this repo](https://github.com/ukr-projects/pinterest-media-scraper) | [🐛 Report Bug](https://github.com/ukr-projects/pinterest-media-scraper/issues) | [💡 Request Feature](https://github.com/ukr-projects/pinterest-media-scraper/issues)
 
 </div>
