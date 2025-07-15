@@ -16,7 +16,7 @@ def setup_page():
     Configures the Streamlit page and applies custom CSS.
     """
     st.set_page_config(
-        page_title="Pinterest Media Downloader",
+        page_title="pinterest-media-scraper",
         page_icon="📌",
         layout="wide",
         initial_sidebar_state="expanded"

@@ -1,8 +1,8 @@
 """
-Pinterest Media Downloader - Professional Pinterest Media Files Downloader
+pinterest-media-scraper - Professional Pinterest Media Files Downloader
 ==============================================
 
-Pinterest Media Downloader with Graphical User Interface
+pinterest-media-scraper with Graphical User Interface
 Streamlit-based desktop/web app to download images and videos from Pinterest.
 
 Author: Ujjwal Nova
