@@ -30,19 +30,20 @@ pinterest-media-scraper is a Streamlit-based desktop/web app to download images 
 ## 🗂️ Folder Structure
 
 ```
-
-Pinterest-Media-Downloader/
-├── LICENSE                    # MIT license
-├── README.md                  # This file
-├── requirements.txt           # Python dependencies
-├── src/                       # Source directory
-|   └── main.py                # Streamlit app entry point
-├── favicon.ico            # App icon
-└── screenshots/           # UI previews
+pinterest-media-scraper/
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── src/
+│   ├── main.py
+│   └── app/
+│       ├── __init__.py
+│       ├── downloader.py
+│       ├── ui.py
+│       └── utils.py
+└── screenshots/
     └── screenshot.png
-
-
-````
+```
 
 ---
 
@@ -91,7 +92,7 @@ pip install -r requirements.txt
 1. **Run** the app:
 
    ```bash
-   streamlit run src/main.py
+   streamlit run app/main.py
    ```
 2. **Enter** a Pinterest URL (pin, board, or profile)
 3. **Click** “🔍 Analyze URL” to fetch media links
