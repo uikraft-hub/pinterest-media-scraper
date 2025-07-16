@@ -1,5 +1,8 @@
 import unittest
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import requests_mock
 from src.app.downloader import PinterestDownloader
 
