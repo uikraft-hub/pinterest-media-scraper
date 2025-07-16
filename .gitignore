@@ -79,3 +79,6 @@ resources/  # If your resources folder contains assets that should not be tracke
 # Other editors
 *.sublime-project
 *.sublime-workspace
+
+# pyproject.toml
+pyproject.toml

@@ -41,6 +41,8 @@ pinterest-media-scraper/
 │       ├── downloader.py
 │       ├── ui.py
 │       └── utils.py
+├── tests/
+│   └── test_downloader.py
 └── screenshots/
     └── screenshot.png
 ```
@@ -77,12 +79,12 @@ pip install -r requirements.txt
 
    ```bash
    git clone https://github.com/ukr-projects/pinterest-media-scraper.git
-   cd pinterest-media-scraper/src
+   cd pinterest-media-scraper
    ```
 2. **Install** dependencies
 
    ```bash
-   pip install -r ../requirements.txt
+   pip install -r requirements.txt
    ```
 
 ---
@@ -92,7 +94,7 @@ pip install -r requirements.txt
 1. **Run** the app:
 
    ```bash
-   streamlit run app/main.py
+   streamlit run src/main.py
    ```
 2. **Enter** a Pinterest URL (pin, board, or profile)
 3. **Click** “🔍 Analyze URL” to fetch media links
