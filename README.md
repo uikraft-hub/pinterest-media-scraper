@@ -31,9 +31,12 @@ pinterest-media-scraper is a Streamlit-based desktop/web app to download images 
 
 ```
 pinterest-media-scraper/
-├── LICENSE
-├── README.md
-├── requirements.txt
+├── .gitignore                   # Git ignore file
+├── CODE_OF_CONDUCT.md           # Code of Conduct
+├── CONTRIBUTING.md              # Contribution guidelines
+├── LICENSE                      # MIT License
+├── README.md                    # This file
+├── requirements.txt             # Python dependencies
 ├── src/
 │   ├── main.py
 │   └── app/
