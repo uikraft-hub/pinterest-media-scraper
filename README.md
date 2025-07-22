@@ -141,7 +141,7 @@ If you find this project useful, please consider giving it a star on GitHub! You
 
 - **GitHub Issues**: [Report bugs or request features](https://github.com/ukr-projects/pinterest-media-scraper/issues)
 - **Discussions**: [Community discussions and Q&A](https://github.com/ukr-projects/pinterest-media-scraper/discussions)
-- **Email**: ukrpurojekuto@gmail.com
+- **Email**: ujjwalkrai@gmail.com
 
 ---
 
