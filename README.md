@@ -81,7 +81,7 @@ pip install -r requirements.txt
 1. **Clone** the repo
 
    ```bash
-   git clone https://github.com/ukr-projects/pinterest-media-scraper.git
+   git clone https://github.com/uikraft-hub/pinterest-media-scraper.git
    cd pinterest-media-scraper
    ```
 2. **Install** dependencies
@@ -139,8 +139,8 @@ If you find this project useful, please consider giving it a star on GitHub! You
 
 ## 📞 Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/ukr-projects/pinterest-media-scraper/issues)
-- **Discussions**: [Community discussions and Q&A](https://github.com/ukr-projects/pinterest-media-scraper/discussions)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/uikraft-hub/pinterest-media-scraper/issues)
+- **Discussions**: [Community discussions and Q&A](https://github.com/uikraft-hub/pinterest-media-scraper/discussions)
 - **Email**: ujjwalkrai@gmail.com
 
 ---
@@ -149,6 +149,6 @@ If you find this project useful, please consider giving it a star on GitHub! You
 
 **Made with ❤️ by the Ujjwal Nova**
 
-[⭐ Star this repo](https://github.com/ukr-projects/pinterest-media-scraper) | [🐛 Report Bug](https://github.com/ukr-projects/pinterest-media-scraper/issues) | [💡 Request Feature](https://github.com/ukr-projects/pinterest-media-scraper/issues)
+[⭐ Star this repo](https://github.com/uikraft-hub/pinterest-media-scraper) | [🐛 Report Bug](https://github.com/uikraft-hub/pinterest-media-scraper/issues) | [💡 Request Feature](https://github.com/uikraft-hub/pinterest-media-scraper/issues)
 
 </div>
