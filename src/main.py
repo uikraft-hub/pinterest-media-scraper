@@ -7,7 +7,7 @@ Streamlit-based desktop/web app to download images and videos from Pinterest.
 
 Author: Ujjwal Nova
 License: MIT
-Repository: https://github.com/ukr-projects/pinterest-media-scraper
+Repository: https://github.com/uikraft-hub/pinterest-media-scraper
 
 What's New:
 - Improved URL normalization and validation
