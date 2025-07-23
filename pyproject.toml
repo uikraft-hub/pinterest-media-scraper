@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pinterest-media-scraper"
 version = "0.1.0"
 authors = [
-  { name="UKR", email="ukrpurojekuto@gmail.com" },
+  { name="ukr", email="ujjwalkrai@gmail.com" },
 ]
 description = "A simple pinterest media scraper"
 readme = "README.md"
@@ -25,5 +25,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/uikraft-hub/pinterest-media-scraperr"
+"Homepage" = "https://github.com/uikraft-hub/pinterest-media-scraper"
 "Bug Tracker" = "https://github.com/uikraft-hub/pinterest-media-scraper/issues"
