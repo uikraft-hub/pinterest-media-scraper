@@ -51,22 +51,6 @@ cd pinterest-media-scraper
 pip install -r requirements.txt
 ```
 
-#### Method 2: Direct Download
-
-1. Download the latest release from [GitHub Releases](https://github.com/uikraft-hub/pinterest-media-scraper/releases)
-2. Extract the archive to your desired location
-3. Install dependencies as shown above
-
-### Running the Application
-
-```bash
-# Navigate to the project directory
-cd pinterest-media-scraper
-
-# Start the Streamlit application
-streamlit run main.py
-```
-
 The application will automatically open in your default web browser at `http://localhost:8501`
 
 ## User Interface Guide
