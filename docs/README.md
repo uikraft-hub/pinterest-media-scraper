@@ -10,14 +10,14 @@
 </div>
 
 <div align="center">
-  <img src="https://readme-typing-svg.demolab.com/?lines=pinterest-media-scraper+is a Streamlit-based desktop/web+to download images+and videos +from +Pinterest&font=Fira%20Code&pause=1000&color=F75C7E&center=true&vCenter=true&width=1000&height=30&cursor=true">
+  <img src="https://readme-typing-svg.demolab.com/?lines=Streamlit+based+Pinterest+media+scraper&font=Fira%20Code&pause=1000&color=F75C7E&center=true&vCenter=true&width=600&height=30&cursor=true">
 </div>
 
 ---
 ## 🖼 Screenshot
 
 <div align="center">
-  <img src="../assets/screenshots/screenshot.jpg" alt="Web UI" width="80%" />
+  <img src="../assets/screenshots/screenshot.png" alt="Web UI" width="80%" />
   <p><em>Web UI</em></p>
 </div>
 
