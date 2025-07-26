@@ -9,7 +9,7 @@ authors = [
   { name="ukr", email="ujjwalkrai@gmail.com" },
 ]
 description = "A simple pinterest media scraper"
-readme = "README.md"
+readme = "docs/README.md"
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Python :: 3",
