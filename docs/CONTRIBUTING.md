@@ -68,6 +68,7 @@ pinterest-media-scraper/
 │   └── USAGE.md
 ├── LICENSE
 ├── pyproject.toml
+├── requirements.txt
 ├── src/
 │   ├── app/
 │   │   ├── __init__.py

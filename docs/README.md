@@ -71,6 +71,7 @@ pinterest-media-scraper/
 │   └── USAGE.md
 ├── LICENSE
 ├── pyproject.toml
+├── requirements.txt
 ├── src/
 │   ├── app/
 │   │   ├── __init__.py
@@ -80,7 +81,6 @@ pinterest-media-scraper/
 │   └── main.py
 └── tests/
     └── test_downloader.py
-
 ```
 
 ---
