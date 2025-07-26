@@ -167,7 +167,7 @@ pinterest_media_003.mp4
 - **Default**: 3 concurrent downloads
 - **Purpose**: Balance between speed and server load
 
-## Step-by-Step Usage
+## Running the Application 
 
 ### Basic Download Process
 
