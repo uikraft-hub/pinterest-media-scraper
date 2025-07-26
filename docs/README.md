@@ -17,7 +17,7 @@
 ## 🖼 Screenshot
 
 <div align="center">
-  <img src="../assets/screenshots/screenshot.jpg" alt="Web UI" />
+  <img src="../assets/screenshots/screenshot.jpg" alt="Web UI" width="80%" />
   <p><em>Web UI</em></p>
 </div>
 
@@ -47,6 +47,39 @@
 ## 🗂️ Folder Structure
 
 ```
+pinterest-media-scraper/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── RELEASE_TEMPLATE.md
+│   └── workflows/
+│       └── ci.yml
+├── .gitignore
+├── assets/
+│   ├── pinterest-media-scraper-banner.jpg
+│   └── screenshots/
+│       └── screenshot.png
+├── docs/
+│   ├── CHANGELOG.md
+│   ├── CODE_OF_CONDUCT.md
+│   ├── CONTRIBUTING.md
+│   ├── README.md
+│   ├── SECURITY.md
+│   ├── STATUS.md
+│   └── USAGE.md
+├── LICENSE
+├── pyproject.toml
+├── src/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── downloader.py
+│   │   ├── ui.py
+│   │   └── utils.py
+│   └── main.py
+└── tests/
+    └── test_downloader.py
 
 ```
 

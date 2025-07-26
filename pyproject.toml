@@ -26,8 +26,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0.0",
-    "requests-mock>=1.12.0",
+    "black",
+    "flake8", 
+    "pytest",
+    "requests-mock",
 ]
 
 [project.urls]
