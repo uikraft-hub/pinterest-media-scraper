@@ -150,8 +150,8 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 - 🐛 Issues: [Repo Issues](https://github.com/uikraft-hub/pinterest-media-scraper/issues)
 - 🔓 Security: [Repo Security](https://github.com/uikraft-hub/pinterest-media-scraper/security)
 - ⛏ Pull Request: [Repo Pull Request](https://github.com/uikraft-hub/pinterest-media-scraper/pulls)
-- 📖 Docs: [Repo Documentation](https://github.com/uikraft-hub/pinterest-media-scraper/docs)
-- 📃 Changelog: [Repo Changelog](https://github.com/uikraft-hub/pinterest-media-scraper/CHANGELOG.md)
+- 📖 Docs: [Repo Documentation](https://github.com/uikraft-hub/pinterest-media-scraper/tree/main/docs)
+- 📃 Changelog: [Repo Changelog](https://github.com/uikraft-hub/pinterest-media-scraper/docs/CHANGELOG.md)
 ---
 
 ## 🔗 Connect

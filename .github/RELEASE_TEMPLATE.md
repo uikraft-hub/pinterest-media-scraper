@@ -75,7 +75,7 @@ MD5: [checksum-here]
 - 🐛 Issues: [Repo Issues](https://github.com/ukr-projects/repo-blueprint/issues)
 - 🔓 Security: [Repo Security](https://github.com/ukr-projects/repo-blueprint/security)
 - ⛏ Pull Request: [Repo Pull Request](https://github.com/ukr-projects/repo-blueprint/pulls)
-- 📖 Docs: [Repo Documentation](https://github.com/ukr-projects/repo-blueprint/docs)
+- 📖 Docs: [Repo Documentation](https://github.com/ukr-projects/repo-blueprint/tree/main/docs)
 - 📃 Changelog: [Repo Changelog](https://github.com/ukr-projects/repo-blueprint/docs/CHANGELOG.md)
 ---
 
