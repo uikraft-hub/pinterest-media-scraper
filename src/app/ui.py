@@ -1,6 +1,4 @@
 """
-UI Module for the Pinterest Media Downloader.
-
 This module contains all the Streamlit components for the user interface.
 """
 

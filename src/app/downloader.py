@@ -1,6 +1,4 @@
 """
-Pinterest Media Downloader Module.
-
 This module defines the PinterestDownloader class, which handles
 the core logic for scraping and downloading media from Pinterest.
 """

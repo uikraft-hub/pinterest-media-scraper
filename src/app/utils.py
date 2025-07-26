@@ -1,6 +1,4 @@
 """
-Utility functions for the Pinterest Media Downloader.
-
 This module contains helper functions for URL validation, normalization,
 and other miscellaneous tasks.
 """
