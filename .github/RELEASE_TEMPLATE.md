@@ -76,7 +76,7 @@ MD5: [checksum-here]
 - 🔓 Security: [Repo Security](https://github.com/uikraft-hub/pinterest-media-scraper/security)
 - ⛏ Pull Request: [Repo Pull Request](https://github.com/uikraft-hub/pinterest-media-scraper/pulls)
 - 📖 Docs: [Repo Documentation](https://github.com/uikraft-hub/pinterest-media-scraper/tree/main/docs)
-- 📃 Changelog: [Repo Changelog](https://github.com/uikraft-hub/pinterest-media-scraper/docs/CHANGELOG.md)
+- 📃 Changelog: [Repo Changelog](https://github.com/uikraft-hub/pinterest-media-scraper/blob/main/docs/CHANGELOG.md)
 ---
 
 *This release source code was tested on: Windows, MacOS and Ubuntu*
